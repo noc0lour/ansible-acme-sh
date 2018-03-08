@@ -1,10 +1,28 @@
 ---
-# heavily inspired by https://gist.github.com/lachesis/943769f3fac740d5848352752ac08741
+- name: Set OS dependent variables
+  include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_distribution }}.yml"
+   - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_os_family }}.yml"
+   - default.yml
+
+- name: OS is supported
+  assert:
+    that: acme-sh_os_supported == True
+
 - name: Create ACME.sh user
   user:
       name: '{{ acme_user }}'
       home: '{{ acme_home_dir }}'
       state: present
+
+- name: Install necessary package on Debian
+  action: >
+      {{ ansible_pkg_mgr }}
+      name="{{ acme-sh_packages }}"
+      state=installed
 
 - name: "Tighten permissions on ACME homedir"
   file:
@@ -19,56 +37,55 @@
     mode: '{{ acme_pki_dir_permissions }}'
     state: directory
 
-- name: "Create ACME well-known dir"
+- name: "Download acme.sh archive from the wild GitHub"
+  get_url:
+    url: "{{ acme_archive_url }}"
+    dest: "{{ acme_archive }}"
+    mode: "0755"
+
+- name: "Create ACME script dirr"
   file:
-    dest: '{{ acme_well_known_dir }}'
-    owner: '{{ acme_well_known_dir_owner }}'
-    group: '{{ acme_well_known_dir_group }}'
-    mode: '{{ acme_well_known_dir_permissions }}'
+    dest: '{{ acme_script_dir }}'
+    owner: '{{ acme_user }}'
+    group: '{{ acme_group }}'
+    mode: '{{ acme_permissions }}'
     state: directory
 
-- name: "Download acme.sh from the wild GitHub"
-  get_url:
-    url: "{{ acme_script_url }}"
-    dest: '{{ acme_script }}'
-    mode: '0755'
 
-- name: "Make acme.sh accessible in {{ acme_symlink_to_local }}"
-  file:
-    src: "{{ acme_script }}"
-    dest: "{{ acme_symlink_to_local }}"
-    state: link
-  when: acme_symlink_to_local is defined
+- name: "Unpack acme.sh archive "
+  unarchive:
+    remote_src: True
+    src: "{{ acme_archive }}"
+    dest: "{{ acme_script_dir }}"
+    owner: "{{ acme_user }}"
+    extra_opts: [--strip-components=1 ]
 
-- name: Make sure socat is present (for standalone mode)
-  yum:
-     name: socat
-     state: present
-  when:
-    - ansible_os_family == "RedHat"
-    - acme_standalone_mode_required
+- name: "Install .acme.sh"
+  become_user: '{{ acme_user }}'
+  become: yes
+  shell: '{{ acme_script_dir }}/acme.sh --install --home {{ acme_data_dir }}'
+  args:
+    chdir: '{{ acme_script_dir }}'
+    creates: '{{ acme_data_dir }}/.acme.sh'
 
-- name: "Enable sudo reload nginx by letsencrypt"
-  template:
-    src: letsencrypt-restart-nginx.j2
-    dest: /etc/sudoers.d/20-letsencrypt-nginx-restart
-  when: acme_sudo_reload_nginx
+- name: "Update accountemail if var is set"
+  become_user: '{{ acme_user }}'
+  become: yes
+  shell: '{{ acme_data_dir }}/acme.sh --updateaccount --acountemail {{ acme_accountemail }}'
+  when: acme_accountemail is defined
 
-- name: "Enable sudo reload haproxy by letsencrypt"
-  template:
-    src: letsencrypt-restart-haproxy.j2
-    dest: /etc/sudoers.d/20-letsencrypt-haproxy-restart
-  when: acme_sudo_reload_haproxy
+- name: "Issue certs if configured"
+  become_user: '{{ acme_user }}'
+  become: yes
+  shell: '{{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode }} -d {{ item.domains|join("-d ") }}'
+  with_items: {{ acme_issue_domains }}
 
-- name: "Enable sudo reload httpd by letsencrypt"
-  template:
-    src: letsencrypt-restart-httpd.j2
-    dest: /etc/sudoers.d/20-letsencrypt-httpd-restart
-  when: acme_sudo_reload_httpd
+- name: "Install certs if not already installed"
+  become_user: '{{ acme_user }}'
+  become: yes
+  shell: >
+      '{{ acme_data_dir }}/acme.sh --installcert -d {{ item.domains[0] }}
+       --key-file {{ item.key_location }} --fullchain-file {{ item.full_chain_location }}
+       --reloadcmd {{ item.reload_cmd }}'
+  with_items: {{ acme_issue_domains }}
 
-#- name: "Install .acme.sh"
-#  become_user: '{{ acme_user }}'
-#  become: yes
-#  shell: 'acme.sh --install --home {{ acme_data_dir }}'
-#  args:
-#    creates: '{{ acme_data_dir }}/.acme.sh'
