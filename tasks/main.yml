@@ -10,7 +10,7 @@
 
 - name: OS is supported
   assert:
-    that: acme-sh_os_supported == True
+    that: acme_sh_os_supported == True
 
 - name: Create ACME.sh user
   user:
@@ -18,10 +18,10 @@
       home: '{{ acme_home_dir }}'
       state: present
 
-- name: Install necessary package on Debian
+- name: Install necessary packages
   action: >
       {{ ansible_pkg_mgr }}
-      name="{{ acme-sh_packages }}"
+      name="{{ acme_sh_packages }}"
       state=installed
 
 - name: "Tighten permissions on ACME homedir"
@@ -67,6 +67,7 @@
   args:
     chdir: '{{ acme_script_dir }}'
     creates: '{{ acme_data_dir }}/.acme.sh'
+  changed_when: false
 
 - name: "Update accountemail if var is set"
   become_user: '{{ acme_user }}'
@@ -77,8 +78,9 @@
 - name: "Issue certs if configured"
   become_user: '{{ acme_user }}'
   become: yes
-  shell: '{{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode }} -d {{ item.domains|join("-d ") }}'
-  with_items: {{ acme_issue_domains }}
+  shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode }} -d {{ item.domains|join(" -d ") }}'
+  with_items: "{{ acme_issue_domains }}"
+  when: acme_issue_domains is defined
 
 - name: "Install certs if not already installed"
   become_user: '{{ acme_user }}'
@@ -87,5 +89,5 @@
       '{{ acme_data_dir }}/acme.sh --installcert -d {{ item.domains[0] }}
        --key-file {{ item.key_location }} --fullchain-file {{ item.full_chain_location }}
        --reloadcmd {{ item.reload_cmd }}'
-  with_items: {{ acme_issue_domains }}
-
+  with_items: "{{ acme_issue_domains }}"
+  when: acme_issue_domains is defined

@@ -1,3 +1,5 @@
 ---
-acme-sh_os_supported: True
-acme-sh_packages: "curl cron"
+acme_sh_os_supported: True
+acme_sh_packages:
+    - cron
+    - curl

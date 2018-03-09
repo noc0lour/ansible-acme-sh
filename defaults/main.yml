@@ -20,3 +20,5 @@ acme_script: '/var/lib/acme/acme.sh'
 acme_archive_url: "https://github.com/noc0lour/acme.sh/archive/rest_dns_api.tar.gz"
 acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
 acme_script_dir: "/var/lib/acme/acme.sh"
+
+acme_environ: ""
