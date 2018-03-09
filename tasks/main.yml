@@ -79,6 +79,9 @@
   become_user: '{{ acme_user }}'
   become: yes
   shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode }} -d {{ item.domains|join(" -d ") }}'
+  register: acme_issue_result
+  changed_when: not acme_issue_result.stdout|search("Domains not changed")
+  failed_when: acme_issue_result.rc > 0 and not acme_issue_result.stdout|search("Domains not changed")
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
 
@@ -86,8 +89,12 @@
   become_user: '{{ acme_user }}'
   become: yes
   shell: >
-      '{{ acme_data_dir }}/acme.sh --installcert -d {{ item.domains[0] }}
-       --key-file {{ item.key_location }} --fullchain-file {{ item.full_chain_location }}
-       --reloadcmd {{ item.reload_cmd }}'
+      {{ acme_data_dir }}/acme.sh --installcert -d {{ item.domains[0] }}
+      --key-file {{ item.key_location }} --fullchain-file {{ item.full_chain_location }}
+      --reloadcmd "{{ item.reload_cmd }}"
+  register: acme_install_result
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
+
+- debug:
+    var: acme_install_result
