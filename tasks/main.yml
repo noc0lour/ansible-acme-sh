@@ -41,6 +41,7 @@
   get_url:
     url: "{{ acme_archive_url }}"
     dest: "{{ acme_archive }}"
+    checksum: "{{ acme_archive_checksum }}"
     mode: "0755"
 
 - name: "Create ACME script dirr"

@@ -19,6 +19,7 @@ acme_script: '/var/lib/acme/acme.sh'
 # Letsencrypt
 acme_archive_url: "https://github.com/noc0lour/acme.sh/archive/rest_dns_api.tar.gz"
 acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
+acme_archive_checksum: "sha512:f7fd28ca810c4ca0f6fe1d0a8b2fbab62b3e6c64860557d90125478f029a7351f3d2f457d05016528ebe7d974414377b88ac3585b314465e4c50fb9ae60569e3"
 acme_script_dir: "/var/lib/acme/acme.sh"
 
 acme_environ: ""
