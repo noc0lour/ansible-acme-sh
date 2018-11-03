@@ -1,6 +1,8 @@
 ---
 # Letsencrypt user
 acme_user: 'letsencrypt'
+acme_group: 'letsencrypt'
+acme_permissions: '0754'
 
 # Location of datadir
 acme_home_dir: '/var/lib/acme'
@@ -12,23 +14,12 @@ acme_pki_dir_owner: 'letsencrypt'
 acme_pki_dir_group: 'letsencrypt'
 acme_pki_dir_permissions: '0755'
 
-# Config off .well-known
-acme_well_known_dir: '/var/www/.well-known/acme-challenge'
-acme_well_known_dir_owner: 'letsencrypt'
-acme_well_known_dir_group: 'letsencrypt'
-acme_well_known_dir_permissions: '0711'
-
 # Location of acme.sh
 acme_script: '/var/lib/acme/acme.sh'
 # Letsencrypt
-acme_script_url: "https://raw.githubusercontent.com/Neilpang/acme.sh/master/acme.sh"
+acme_archive_url: "https://github.com/noc0lour/acme.sh/archive/master.tar.gz"
+acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
+acme_archive_checksum: "sha512:de876497a4a2176ce133fe281b000c2c578a40d9d48b90c5eefa4fc24917d7a3c2e1a122083df70dc6efcdc6dffdd60ab445170cf97fb108f89f616a9333d0c4"
+acme_script_dir: "/var/lib/acme/acme.sh"
 
-acme_symlink_to_local: '/usr/local/bin/acme.sh'
-
-# Enable some services restart nginx
-acme_sudo_reload_nginx: True
-acme_sudo_reload_httpd: True
-acme_sudo_reload_haproxy: True
-
-# are we goind to use standalone mode (and install socat?)
-acme_standalone_mode_required: True
+acme_environ: ""
