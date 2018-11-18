@@ -52,6 +52,14 @@
     mode: '{{ acme_permissions }}'
     state: directory
 
+- name: "Create ACME cert base dir"
+  file:
+    dest: '{{ acme_cert_base }}'
+    owner: '{{ acme_user }}'
+    group: '{{ acme_group }}'
+    mode: '{{ acme_permissions }}'
+    state: directory
+
 
 - name: "Unpack acme.sh archive "
   unarchive:
