@@ -19,7 +19,7 @@ acme_script: '/var/lib/acme/acme.sh'
 # Letsencrypt
 acme_archive_url: "https://github.com/noc0lour/acme.sh/archive/master.tar.gz"
 acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
-acme_archive_checksum: "sha512:de876497a4a2176ce133fe281b000c2c578a40d9d48b90c5eefa4fc24917d7a3c2e1a122083df70dc6efcdc6dffdd60ab445170cf97fb108f89f616a9333d0c4"
+acme_archive_checksum: "sha512:11d408e5a6bf5e36ca8f053afaf7164a3d5582ee78b37084ba34ae91e3da9d65b3add63100fa66e7df48cd9d2bf574857477cde9f73fac93968b54b261243800"
 acme_script_dir: "/var/lib/acme/acme.sh"
 
 acme_environ: ""

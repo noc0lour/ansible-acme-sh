@@ -22,7 +22,7 @@
   action: >
       {{ ansible_pkg_mgr }}
       name="{{ acme_sh_packages }}"
-      state=installed
+      state=present
 
 - name: "Tighten permissions on ACME homedir"
   file:
