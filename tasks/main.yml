@@ -22,7 +22,7 @@
   action: >
       {{ ansible_pkg_mgr }}
       name="{{ acme_sh_packages }}"
-      state=installed
+      state=present
 
 - name: "Tighten permissions on ACME homedir"
   file:
@@ -81,8 +81,8 @@
   become: yes
   shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode }} -d {{ item.domains|join(" -d ") }}'
   register: acme_issue_result
-  changed_when: not acme_issue_result.stdout|search("Domains not changed")
-  failed_when: acme_issue_result.rc > 0 and not acme_issue_result.stdout|search("Domains not changed")
+  changed_when: not acme_issue_result.stdout is search("Domains not changed")
+  failed_when: acme_issue_result.rc > 0 and not acme_issue_result.stdout is search("Domains not changed")
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
 
