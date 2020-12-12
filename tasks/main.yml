@@ -37,7 +37,7 @@
     mode: '{{ acme_pki_dir_permissions }}'
     state: directory
 
-- name: "Download acme.sh archive from the wild GitHub"
+- name: "Download acme.sh archive"
   get_url:
     url: "{{ acme_archive_url }}"
     dest: "{{ acme_archive }}"
