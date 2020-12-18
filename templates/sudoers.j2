@@ -1,0 +1,9 @@
+#jinja2:lstrip_blocks: True
+{% for domain, commands in acme_real_reloadcmds.items() %}
+# sudo commands for {{ domain }}
+  {% for cmd in commands %}
+    {% if cmd.startswith('sudo') %}
+{{ acme_user }} ALL=NOPASSWD: {{ cmd.lstrip('sudo').strip() }}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
