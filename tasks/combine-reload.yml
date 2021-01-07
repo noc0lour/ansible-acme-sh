@@ -3,9 +3,10 @@
   set_fact:
     acme_reload_cmds: "{{ acme_reload_cmds | default([]) + ['sudo /usr/bin/mkdir -p ' + item.install_dir, 'sudo /usr/bin/chown ' + item.cert_user + ' ' + item.install_dir, 'sudo /usr/bin/chgrp ' + item.cert_group + ' ' + item.install_dir, 'sudo /usr/bin/cp ' + acme_fullchain_location[acme_cert.domains[0]] + ' ' + (item.install_dir, 'fullchain.pem') | path_join, 'sudo /usr/bin/chown ' + item.cert_user + ' ' + (item.install_dir, 'fullchain.pem') | path_join, 'sudo /usr/bin/chgrp ' + item.cert_group + ' ' + (item.install_dir, 'fullchain.pem') | path_join, 'sudo /usr/bin/cp ' + acme_key_location[acme_cert.domains[0]] + ' ' + (item.install_dir, 'key.pem') | path_join, 'sudo /usr/bin/chown ' + item.cert_user + ' ' + (item.install_dir,  'key.pem') | path_join, 'sudo /usr/bin/chgrp ' + item.cert_group + ' ' + (item.install_dir,  'key.pem') | path_join, item.reload_cmd ] }}"
   loop: "{{ acme_cert.install_targets }}"
-  when: acme_cert.install_targets is defined
+  when: acme_issue_domains is defined and acme_cert.install_targets is defined
 
 - name: "save commands in dict with domain key to generate sudoers & reload cmd later"
   set_fact:
-    acme_real_reloadcmds: "{{ acme_real_reloadcmds | default({}) | combine({acme_cert.domains[0]: acme_reload_cmds}) }}"
+    acme_real_reloadcmds: "{{ acme_real_reloadcmds | default({}) | combine({acme_cert.domains[0]: acme_reload_cmds | default([])}) }}"
     acme_reload_cmds: []
+  when: acme_issue_domains is defined

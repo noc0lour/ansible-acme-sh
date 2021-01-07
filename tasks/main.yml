@@ -131,12 +131,8 @@
   set_fact:
     acme_install_cmds: "{{ acme_install_cmds | default({}) | combine({item.domains[0]: (acme_data_dir, 'acme.sh') | path_join + ' --installcert -d ' + item.domains[0] + ' --key-file ' + acme_key_location[item.domains[0]] + ' --fullchain-file ' + acme_fullchain_location[item.domains[0]] + ' --reloadcmd '  + acme_real_reloadcmds[item.domains[0]] | join('; ') | quote }) }}"
   with_items: "{{ acme_issue_domains }}"
+  when: acme_issue_domains is defined
 
-
-- name: "Debug install certs"
-  debug:
-    var: acme_install_cmds
-  when: ansible_check_mode
 
 - name: "Install certs if not already installed"
   become_user: '{{ acme_user }}'
@@ -145,3 +141,4 @@
   register: acme_install_result
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
+  ignore_errors: yes
