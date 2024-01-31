@@ -17,9 +17,9 @@ acme_pki_dir_permissions: '0755'
 # Location of acme.sh
 acme_script: '/var/lib/acme/acme.sh'
 # Letsencrypt
-acme_archive_url: "https://github.com/acmesh-official/acme.sh/archive/2.8.7.tar.gz"
+acme_archive_url: "https://github.com/acmesh-official/acme.sh/archive/3.0.7.tar.gz"
 acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
-acme_archive_checksum: "sha512:45599f50a4a45b6fdea58d7a5759e4eb5f8e33acc53d60b264c15662e6bdc1e353af610845056fc67b127242c4ad15eaaf60a2113f2cb0245d4e4861dac6e1c3"
+acme_archive_checksum: "sha512:83d080b461662bf2c5cfa9cb51aaf41d7f873f54908e2e5f94d7e3fe8e3f6953d73aafb66adc97455aa958f37c72ef77ba475c7d7cbb3ca3c5bbffb4937c4bae"
 acme_script_dir: "/var/lib/acme/acme.sh"
 
 acme_environ: ""

@@ -81,13 +81,13 @@
 - name: "Update accountemail if var is set"
   become_user: '{{ acme_user }}'
   become: yes
-  shell: '{{ acme_data_dir }}/acme.sh --updateaccount --acountemail {{ acme_accountemail }}'
+  shell: '{{ acme_data_dir }}/acme.sh --updateaccount --accountemail {{ acme_accountemail }} --accounturl {{ acme_accounturl }}'
   when: acme_accountemail is defined
 
 - name: "Issue certs if configured"
   become_user: '{{ acme_user }}'
   become: yes
-  shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join(" -d ") }}'
+  shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join(" -d ") }} --server letsencrypt'
   register: acme_issue_result
   changed_when: not acme_issue_result.stdout is search("Domains not changed")
   failed_when: acme_issue_result.rc > 0 and not acme_issue_result.stdout is search("Domains not changed")
