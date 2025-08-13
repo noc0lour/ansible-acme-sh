@@ -23,3 +23,6 @@ acme_archive_checksum: "sha512:83d080b461662bf2c5cfa9cb51aaf41d7f873f54908e2e5f9
 acme_script_dir: "/var/lib/acme/acme.sh"
 
 acme_environ: ""
+
+
+acme_plugins: []
