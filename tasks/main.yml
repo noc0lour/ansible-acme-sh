@@ -137,7 +137,9 @@
 - name: "Install certs if not already installed"
   become_user: '{{ acme_user }}'
   become: yes
-  shell: "{{ acme_install_cmds[item.domains[0]] }}"
+  shell:
+    cmd: "{{ acme_install_cmds[item.domains[0]] }}"
+    creates: '{{ item.install_targets[0].install_dir }}/fullchain.pem'
   register: acme_install_result
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
