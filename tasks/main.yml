@@ -1,93 +1,93 @@
 ---
 - name: Set OS dependent variables
-  include_vars: "{{ item }}"
+  ansible.builtin.include_vars: "{{ item }}"
   with_first_found:
-   - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
-   - "{{ ansible_distribution }}.yml"
-   - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
-   - "{{ ansible_os_family }}.yml"
-   - default.yml
+    - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+    - default.yml
 
 - name: OS is supported
-  assert:
+  ansible.builtin.assert:
     that: acme_sh_os_supported == True
 
 - name: Create ACME.sh user
-  user:
-      name: '{{ acme_user }}'
-      home: '{{ acme_home_dir }}'
-      state: present
+  ansible.builtin.user:
+    name: "{{ acme_user }}"
+    home: "{{ acme_home_dir }}"
+    state: present
 
 - name: Install necessary packages
   action: >
-      {{ ansible_pkg_mgr }}
-      name="{{ acme_sh_packages }}"
-      state=present
+    {{ ansible_pkg_mgr }}
+    name="{{ acme_sh_packages }}"
+    state=present
 
 - name: "Tighten permissions on ACME homedir"
-  file:
-    path: '{{ acme_home_dir }}'
-    mode: '700'
+  ansible.builtin.file:
+    path: "{{ acme_home_dir }}"
+    mode: "700"
 
 - name: "Create ACME pki dir"
-  file:
-    dest: '{{ acme_pki_dir }}'
-    owner: '{{ acme_pki_dir_owner }}'
-    group: '{{ acme_pki_dir_group }}'
-    mode: '{{ acme_pki_dir_permissions }}'
+  ansible.builtin.file:
+    dest: "{{ acme_pki_dir }}"
+    owner: "{{ acme_pki_dir_owner }}"
+    group: "{{ acme_pki_dir_group }}"
+    mode: "{{ acme_pki_dir_permissions }}"
     state: directory
 
 - name: "Download acme.sh archive"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ acme_archive_url }}"
     dest: "{{ acme_archive }}"
     checksum: "{{ acme_archive_checksum }}"
     mode: "0755"
 
 - name: "Create ACME script dirr"
-  file:
-    dest: '{{ acme_script_dir }}'
-    owner: '{{ acme_user }}'
-    group: '{{ acme_group }}'
-    mode: '{{ acme_permissions }}'
+  ansible.builtin.file:
+    dest: "{{ acme_script_dir }}"
+    owner: "{{ acme_user }}"
+    group: "{{ acme_group }}"
+    mode: "{{ acme_permissions }}"
     state: directory
 
 - name: "Create ACME cert base dir"
-  file:
-    dest: '{{ acme_cert_base }}'
-    owner: '{{ acme_user }}'
-    group: '{{ acme_group }}'
-    mode: '{{ acme_permissions }}'
+  ansible.builtin.file:
+    dest: "{{ acme_cert_base }}"
+    owner: "{{ acme_user }}"
+    group: "{{ acme_group }}"
+    mode: "{{ acme_permissions }}"
     state: directory
 
-
 - name: "Unpack acme.sh archive "
-  unarchive:
-    remote_src: True
+  ansible.builtin.unarchive:
+    remote_src: true
     src: "{{ acme_archive }}"
     dest: "{{ acme_script_dir }}"
     owner: "{{ acme_user }}"
-    extra_opts: [--strip-components=1 ]
+    extra_opts: [--strip-components=1]
 
 - name: "Install .acme.sh"
-  become_user: '{{ acme_user }}'
-  become: yes
-  shell: '{{ acme_script_dir }}/acme.sh --install --home {{ acme_data_dir }}'
+  become_user: "{{ acme_user }}"
+  become: true
+  ansible.builtin.command: "{{ acme_script_dir }}/acme.sh --install --home {{ acme_data_dir }}"
   args:
-    chdir: '{{ acme_script_dir }}'
-    creates: '{{ acme_data_dir }}/.acme.sh'
+    chdir: "{{ acme_script_dir }}"
+    creates: "{{ acme_data_dir }}/.acme.sh"
   changed_when: false
 
 - name: "Update accountemail if var is set"
-  become_user: '{{ acme_user }}'
-  become: yes
-  shell: '{{ acme_data_dir }}/acme.sh --updateaccount --accountemail {{ acme_accountemail }} --accounturl {{ acme_accounturl }}'
+  become_user: "{{ acme_user }}"
+  become: true
+  ansible.builtin.command: "{{ acme_data_dir }}/acme.sh --updateaccount --accountemail {{ acme_accountemail }} --accounturl {{ acme_accounturl }}"
   when: acme_accountemail is defined
 
 - name: "Issue certs if configured"
-  become_user: '{{ acme_user }}'
-  become: yes
-  shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join(" -d ") }} --server letsencrypt'
+  become_user: "{{ acme_user }}"
+  become: true
+  ansible.builtin.command: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join("
+    -d ") }} --server letsencrypt'
   register: acme_issue_result
   changed_when: not acme_issue_result.stdout is search("Domains not changed")
   failed_when: acme_issue_result.rc > 0 and not acme_issue_result.stdout is search("Domains not changed")
@@ -95,14 +95,16 @@
   when: acme_issue_domains is defined
 
 - name: "Get full cert install paths"
-  set_fact:
-    acme_fullchain_location: "{{ acme_fullchain_location | default({}) | combine({item.domains[0]: item.full_chain_location | default([acme_default_base_dir, item.domains[0], 'fullchain.pem'] | path_join)})  }}"
-    acme_key_location: "{{ acme_key_location | default({}) | combine({item.domains[0]: item.key_location | default([acme_default_base_dir, item.domains[0], 'key.pem'] | path_join)})  }}"
+  ansible.builtin.set_fact:
+    acme_fullchain_location: "{{ acme_fullchain_location | default({}) | combine({item.domains[0]: item.full_chain_location | default([acme_default_base_dir, item.domains[0],
+      'fullchain.pem'] | path_join)}) }}"
+    acme_key_location: "{{ acme_key_location | default({}) | combine({item.domains[0]: item.key_location | default([acme_default_base_dir, item.domains[0], 'key.pem']
+      | path_join)}) }}"
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
 
 - name: "Create cert & key basedir"
-  file:
+  ansible.builtin.file:
     dest: "{{ item[1][item[0].domains[0]] | dirname }}"
     state: directory
     owner: "{{ acme_user }}"
@@ -110,37 +112,37 @@
   loop: "{{ acme_issue_domains | product( [acme_fullchain_location, acme_key_location]) | list }}"
   when: acme_issue_domains is defined
 
-
 - name: "Combining reload commands for multiple install targets"
-  include_tasks: combine-reload.yml
+  ansible.builtin.include_tasks: combine-reload.yml
   loop: "{{ acme_issue_domains }}"
   loop_control:
     loop_var: acme_cert
   when: acme_issue_domains is defined
 
-- template:
+- ansible.builtin.template:
     src: "sudoers.j2"
     dest: "/etc/sudoers.d/acme"
-    mode: 0640
+    mode: "0640"
     owner: root
     group: root
     validate: 'bash -c "cat /etc/sudoers %s | visudo -cf-"'
   when: acme_issue_domains is defined
 
 - name: "Define acme.sh install cmd"
-  set_fact:
-    acme_install_cmds: "{{ acme_install_cmds | default({}) | combine({item.domains[0]: (acme_data_dir, 'acme.sh') | path_join + ' --installcert -d ' + item.domains[0] + ' --key-file ' + acme_key_location[item.domains[0]] + ' --fullchain-file ' + acme_fullchain_location[item.domains[0]] + ' --reloadcmd '  + acme_real_reloadcmds[item.domains[0]] | join('; ') | quote }) }}"
+  ansible.builtin.set_fact:
+    acme_install_cmds: "{{ acme_install_cmds | default({}) | combine({item.domains[0]: (acme_data_dir, 'acme.sh') | path_join + ' --installcert -d ' + item.domains[0]
+      + ' --key-file ' + acme_key_location[item.domains[0]] + ' --fullchain-file ' + acme_fullchain_location[item.domains[0]] + ' --reloadcmd ' + acme_real_reloadcmds[item.domains[0]]
+      | join('; ') | quote}) }}"
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
 
-
 - name: "Install certs if not already installed"
-  become_user: '{{ acme_user }}'
-  become: yes
-  shell:
+  become_user: "{{ acme_user }}"
+  become: true
+  ansible.builtin.command:
     cmd: "{{ acme_install_cmds[item.domains[0]] }}"
-    creates: '{{ item.install_targets[0].install_dir }}/fullchain.pem'
+    creates: "{{ item.install_targets[0].install_dir }}/fullchain.pem"
   register: acme_install_result
   with_items: "{{ acme_issue_domains }}"
   when: acme_issue_domains is defined
-  ignore_errors: yes
+  ignore_errors: true

@@ -1,28 +1,27 @@
 ---
 # Letsencrypt user
-acme_user: 'letsencrypt'
-acme_group: 'letsencrypt'
-acme_permissions: '0754'
+acme_user: "letsencrypt"
+acme_group: "letsencrypt"
+acme_permissions: "0754"
 
 # Location of datadir
-acme_home_dir: '/var/lib/acme'
-acme_data_dir: '/var/lib/acme/.acme.sh'
+acme_home_dir: "/var/lib/acme"
+acme_data_dir: "/var/lib/acme/.acme.sh"
 
 # Location of directories
-acme_pki_dir: '/etc/pki/acme'
-acme_pki_dir_owner: 'letsencrypt'
-acme_pki_dir_group: 'letsencrypt'
-acme_pki_dir_permissions: '0755'
+acme_pki_dir: "/etc/pki/acme"
+acme_pki_dir_owner: "letsencrypt"
+acme_pki_dir_group: "letsencrypt"
+acme_pki_dir_permissions: "0755"
 
 # Location of acme.sh
-acme_script: '/var/lib/acme/acme.sh'
+acme_script: "/var/lib/acme/acme.sh"
 # Letsencrypt
 acme_archive_url: "https://github.com/acmesh-official/acme.sh/archive/3.0.7.tar.gz"
-acme_archive : "{{ acme_home_dir }}/acme.sh.tar.gz"
+acme_archive: "{{ acme_home_dir }}/acme.sh.tar.gz"
 acme_archive_checksum: "sha512:83d080b461662bf2c5cfa9cb51aaf41d7f873f54908e2e5f94d7e3fe8e3f6953d73aafb66adc97455aa958f37c72ef77ba475c7d7cbb3ca3c5bbffb4937c4bae"
 acme_script_dir: "/var/lib/acme/acme.sh"
 
 acme_environ: ""
-
 
 acme_plugins: []

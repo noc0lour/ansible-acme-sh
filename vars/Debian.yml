@@ -1,5 +1,5 @@
 ---
-acme_sh_os_supported: True
+acme_sh_os_supported: true
 acme_sh_packages:
-    - cron
-    - curl
+  - cron
+  - curl
