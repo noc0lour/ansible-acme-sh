@@ -86,7 +86,7 @@
 - name: "Issue certs if configured"
   become_user: "{{ acme_user }}"
   become: true
-  ansible.builtin.command: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join("
+  ansible.builtin.shell: '{{ acme_environ }} {{ acme_data_dir }}/acme.sh --issue {{ item.issue_mode | default(acme_default_issue_mode) }} -d {{ item.domains|join("
     -d ") }} --server letsencrypt'
   register: acme_issue_result
   changed_when: not acme_issue_result.stdout is search("Domains not changed")
